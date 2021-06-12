@@ -1,3 +1,4 @@
+import matplotlib.tri as mtri
 import numpy as np
 
 
@@ -23,6 +24,7 @@ class PhasePattern:
         self.theta_grid = None
 
         self.DNA = None
+        self.cartesian = None
 
         self._fill_angle_arrays()
 
@@ -47,4 +49,25 @@ class PhasePattern:
     def calc_DNA(self):
         self.fi_grid, self.theta_grid = np.meshgrid(self.fi_array, self.theta_array)
         self.DNA = self._calc_G(self.fi_grid, self.theta_grid)
+
+    def calc_cartesian(self):
+        fi_gaps = len(self.fi_array) // 100
+        if fi_gaps == 0:
+            fi_gaps = 1
+        theta_gaps = len(self.theta_array) // 100
+        if theta_gaps == 0:
+            theta_gaps = 1
+
+        fi = self.fi_grid[::fi_gaps, ::theta_gaps].flatten()
+        theta = self.theta_grid[::fi_gaps, ::theta_gaps].flatten()
+        r = self.DNA[::fi_gaps, ::theta_gaps].flatten()
+
+        x = r * np.sin(theta) * np.cos(fi)
+        y = r * np.sin(theta) * np.sin(fi)
+        z = r * np.cos(theta)
+        tri = mtri.Triangulation(fi, theta)
+        self.cartesian = {'x': x, 'y': y, 'z': z, 'tri': tri}
+
+
+
 
