@@ -24,14 +24,8 @@ def test():
         "theta_s_deg": 20.,
         "fi_0_deg": 10.,
         "theta_0_deg": 10.,
-        "l_main": 10.,
-        "l_side": 1.,
         "fi_count": 10000,
         "theta_count": 10000,
-        "fi_min_deg": -60.,
-        "fi_max_deg": 60.,
-        "theta_min_deg": -50.,
-        "theta_max_deg": 50.
     }
     
 

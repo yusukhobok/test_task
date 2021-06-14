@@ -3,6 +3,7 @@ from PyQt5 import QtWidgets
 class SettingsWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
         QtWidgets.QWidget.__init__(self, parent)
+        self._parent = parent
         self.vbox = QtWidgets.QVBoxLayout()
         self.fi_s_deg = self.add_float_item("Угол установки луча по азимуту (φ<sub>s</sub>), °", 30, -60, 60, 3, 1)
         self.theta_s_deg = self.add_float_item("Угол установки луча по возвышению (θ<sub>s</sub>), °", 20, -60, 60, 3, 1)
@@ -11,8 +12,8 @@ class SettingsWidget(QtWidgets.QWidget):
         self.fi_count = self.add_int_item("Размеры расчетной сетки по азимуту, шагов", 1000, 100, 10000)
         self.theta_count = self.add_int_item("Размеры расчетной сетки по возвышению, шагов", 1000, 100, 10000)
         self.log_scale = self.add_bool_item("Логарифмический масштаб", False)
-
         self.btn_calc = QtWidgets.QPushButton("Расчет")
+        self.btn_calc.clicked.connect(self._parent.refresh)
         self.vbox.addWidget(self.btn_calc)
         self.setLayout(self.vbox)
 
@@ -54,3 +55,17 @@ class SettingsWidget(QtWidgets.QWidget):
         hbox = SettingsWidget.add_horizontal_box(caption, chk)
         self.vbox.addLayout(hbox)
         return chk
+
+    def to_dict(self):
+        return {
+            "fi_s_deg": self.fi_s_deg.value(),
+            "theta_s_deg": self.theta_s_deg.value(),
+            "fi_0_deg": self.fi_0_deg.value(),
+            "theta_0_deg": self.theta_0_deg.value(),
+            "fi_count": int(self.fi_count.value()),
+            "theta_count": int(self.theta_count.value()),
+            "log_scale": self.log_scale.isChecked(),
+        }
+
+
+

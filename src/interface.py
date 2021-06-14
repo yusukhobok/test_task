@@ -6,6 +6,9 @@ from widgets.phase_pattern_2d_widget import PhasePattern2dWidget
 from widgets.phase_pattern_3d_widget import PhasePattern3dWidget
 from widgets.phase_pattern_slices_widget import PhasePatternSlicesWidget
 
+from calculations import PhasePattern
+
+
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
@@ -31,3 +34,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.grid.setRowStretch(1, 1)
         self.grid.setColumnStretch(0, 1)
         self.grid.setColumnStretch(1, 1)
+
+        self.phase_pattern = PhasePattern(self.settings_widget.to_dict())
+
+    def refresh(self):
+        options = self.settings_widget.to_dict()
+        self.phase_pattern.refresh(options)
+        self.plot_2d()
+
+    def plot_2d(self):
+        self.phase_pattern_2d_widget.plot(self.phase_pattern)
+
+    def plot_3d(self):
+        print(self.phase_pattern.cartesian)

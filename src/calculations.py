@@ -4,19 +4,21 @@ import numpy as np
 
 class PhasePattern:
     def __init__(self, options):
-        self.fi_s = np.radians(options["fi_s_deg"])
-        self.theta_s = np.radians(options["theta_s_deg"])
-        self.fi_0 = np.radians(options["fi_0_deg"])
-        self.theta_0 = np.radians(options["theta_0_deg"])
-        self.l_main = options["l_main"]
-        self.l_side = options["l_side"]
+        self.fi_s = np.radians(30)
+        self.theta_s = np.radians(20)
+        self.fi_0 = np.radians(10)
+        self.theta_0 = np.radians(10)
+        self.fi_count = 10000
+        self.theta_count = 10000
 
-        self.fi_min = np.radians(options["fi_min_deg"])
-        self.fi_max = np.radians(options["fi_max_deg"])
-        self.theta_min = np.radians(options["theta_min_deg"])
-        self.theta_max = np.radians(options["theta_max_deg"])
-        self.fi_count = options["fi_count"]
-        self.theta_count = options["theta_count"]
+        self.l_main = 10
+        self.l_side = 1
+
+        self.fi_min = np.radians(-60)
+        self.fi_max = np.radians(60)
+        self.theta_min = np.radians(-50)
+        self.theta_max = np.radians(50)
+
 
         self.fi_array = None
         self.theta_array = None
@@ -26,7 +28,18 @@ class PhasePattern:
         self.DNA = None
         self.cartesian = None
 
+        self.refresh(options)
+
+    def refresh(self, options):
+        self.fi_s = np.radians(options.get("fi_s_deg", 30))
+        self.theta_s = np.radians(options.get("theta_s_deg", 20))
+        self.fi_0 = np.radians(options.get("fi_0_deg", 10))
+        self.theta_0 = np.radians(options.get("theta_0_deg", 10))
+        self.fi_count = options.get("fi_count", 10000)
+        self.theta_count = options.get("theta_count", 10000)
         self._fill_angle_arrays()
+        self.calc_DNA()
+        self.calc_cartesian()
 
     def _calc_l(self, fi, theta):
         L = np.empty((self.fi_count, self.theta_count))
