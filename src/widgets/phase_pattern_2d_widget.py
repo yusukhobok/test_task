@@ -6,6 +6,7 @@ import numpy as np
 class PhasePattern2dWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
         QtWidgets.QWidget.__init__(self, parent)
+        self._parent = parent
         self.vbox = QtWidgets.QVBoxLayout()
         self.plot_widget = pg.PlotWidget()
         self.plot_widget.setLabel('bottom', 'φ', "°")
@@ -27,23 +28,17 @@ class PhasePattern2dWidget(QtWidgets.QWidget):
             self.plot_widget.addItem(self.img)
         self.img.setImage(phase_pattern.DNA)
 
-        scale_x = (phase_pattern.fi_max - phase_pattern.fi_min) / self.img.width()
-        scale_y = (phase_pattern.theta_max - phase_pattern.theta_min) / self.img.height()
+        fi_min, fi_max, theta_min, theta_max = phase_pattern.limits_to_degrees()
+        scale_x = (fi_max - fi_min) / self.img.width()
+        scale_y = (theta_max - theta_min) / self.img.height()
         if self.current_scale[0] != 0 and self.current_scale[1] != 0:
             self.img.scale(scale_x/self.current_scale[0], scale_y/self.current_scale[1])
             self.current_scale = [scale_x, scale_y]
-            self.img.moveBy(phase_pattern.fi_min - self.currentMove[0], phase_pattern.theta_min - self.currentMove[1])
-            self.currentMove = [phase_pattern.fi_min, phase_pattern.theta_min]
+            self.img.moveBy(fi_min - self.currentMove[0], theta_min - self.currentMove[1])
+            self.currentMove = [fi_min, theta_min]
 
-        self.plot_widget.setLimits(xMin = phase_pattern.fi_min, xMax = phase_pattern.fi_max, yMin = phase_pattern.theta_min, yMax = phase_pattern.theta_max)
-        self.plot_widget.setRange(xRange = (phase_pattern.fi_min, phase_pattern.fi_max), yRange = (phase_pattern.theta_min, phase_pattern.theta_max))
-
-
-
-    # limits = [phase_pattern.fi_min, phase_pattern.fi_max, phase_pattern.theta_max, phase_pattern.theta_min]
-    # limits_deg = np.rad2deg(limits)
-    # plt.imshow(phase_pattern.DNA, extent=limits_deg)
-    # plt.colorbar()
+        self.plot_widget.setLimits(xMin = fi_min, xMax = fi_max, yMin = theta_min, yMax = theta_max)
+        self.plot_widget.setRange(xRange = (fi_min, fi_max), yRange = (theta_min, theta_max))
 
     def _adjuct_color_map(self):
         colormap = cm.get_cmap("jet")
@@ -55,7 +50,6 @@ class PhasePattern2dWidget(QtWidgets.QWidget):
         pnt = evt.scenePos()
         pnt = (pnt.x(), pnt.y())
         mouse_point = self.plot_widget.getPlotItem().vb.mapSceneToView(evt.scenePos())
-        x = mouse_point.x()
-        y = mouse_point.y()
-        btn = evt.button()
-        print(x, y)
+        fi_deg = mouse_point.x()
+        theta_deg = mouse_point.y()
+        self._parent.plot_slices(fi_deg, theta_deg)

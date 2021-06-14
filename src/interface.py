@@ -47,3 +47,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def plot_3d(self):
         print(self.phase_pattern.cartesian)
+
+    def plot_slices(self, fi_deg, theta_deg):
+        slice_fi_deg, slice_theta_deg = self.phase_pattern.get_slices(fi_deg, theta_deg)
+        self.phase_pattern_slices_widget.plot_slices(fi_deg, theta_deg, slice_fi_deg, slice_theta_deg, self.phase_pattern)
+

@@ -19,7 +19,6 @@ class PhasePattern:
         self.theta_min = np.radians(-50)
         self.theta_max = np.radians(50)
 
-
         self.fi_array = None
         self.theta_array = None
         self.fi_grid = None
@@ -80,6 +79,17 @@ class PhasePattern:
         z = r * np.cos(theta)
         tri = mtri.Triangulation(fi, theta)
         self.cartesian = {'x': x, 'y': y, 'z': z, 'tri': tri}
+
+    def limits_to_degrees(self):
+        return np.degrees(self.fi_min), np.degrees(self.fi_max), np.degrees(self.theta_min), np.degrees(self.theta_max)
+
+    def get_slices(self, fi_deg, theta_deg):
+        fi, theta = np.radians(fi_deg), np.radians(theta_deg)
+        delta_fi = self.fi_array[1] - self.fi_array[0]
+        delta_theta = self.theta_array[1] - self.theta_array[0]
+        index_fi = int((fi - self.fi_min) // delta_fi)
+        index_theta = int((theta - self.theta_min) // delta_theta)
+        return np.degrees(self.DNA[:,index_theta]), np.degrees(self.DNA[index_fi, :])
 
 
 
