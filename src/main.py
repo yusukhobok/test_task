@@ -1,9 +1,22 @@
-# import matplotlib
-# matplotlib.use('TKAgg')
+import sys
+
+import numpy as np
+import pyqtgraph as pg
+# import qdarkstyle
+from matplotlib import image
+from PyQt5 import QtCore, QtWidgets, QtGui
+
+
 
 from calculations import PhasePattern
 import matplotlib.pyplot as plt
 import numpy as np
+
+from PyQt5.QtWidgets import QApplication
+
+from interface import MainWindow
+
+
 
 def test():
     options = {
@@ -25,12 +38,12 @@ def test():
 
     phase_pattern = PhasePattern(options)
     phase_pattern.calc_DNA()
-    # phase_pattern.calc_cartesian()
+    phase_pattern.calc_cartesian()
 
-    limits = [phase_pattern.fi_min, phase_pattern.fi_max, phase_pattern.theta_max, phase_pattern.theta_min]
-    limits_deg = np.rad2deg(limits)
-    plt.imshow(phase_pattern.DNA, extent=limits_deg)
-    plt.colorbar()
+    # limits = [phase_pattern.fi_min, phase_pattern.fi_max, phase_pattern.theta_max, phase_pattern.theta_min]
+    # limits_deg = np.rad2deg(limits)
+    # plt.imshow(phase_pattern.DNA, extent=limits_deg)
+    # plt.colorbar()
 
     # delta_fi = phase_pattern.fi_array[1] - phase_pattern.fi_array[0]
     # delta_theta = phase_pattern.theta_array[1] - phase_pattern.theta_array[0]
@@ -45,15 +58,15 @@ def test():
     # ax.plot_trisurf(phase_pattern.cartesian['x'], phase_pattern.cartesian['y'], phase_pattern.cartesian['z'],
     #                 triangles=phase_pattern.cartesian['tri'].triangles, cmap=plt.cm.Spectral)
 
-
-
-
     plt.show()
 
 
-
-
-
-
 if __name__ == "__main__":
-    test()
+    QApplication.setAttribute(QtCore.Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
+    pg.setConfigOption('background', 'w')
+
+    app = QtWidgets.QApplication(sys.argv)
+    # app.setStyleSheet(qdarkstyle.load_stylesheet())
+    window = MainWindow()
+    window.show()
+    app.exec()
