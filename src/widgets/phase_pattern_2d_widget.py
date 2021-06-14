@@ -1,7 +1,10 @@
+import sys
+
 import pyqtgraph as pg
 from PyQt5 import QtWidgets
 from matplotlib import cm
 import numpy as np
+
 
 class PhasePattern2dWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
@@ -21,11 +24,11 @@ class PhasePattern2dWidget(QtWidgets.QWidget):
         self.current_scale = [1, 1]
         self.currentMove = [0, 0]
 
-    def plot(self, phase_pattern):
+    def plot(self, phase_pattern, log_scale):
         if self.img is None:
             self.img = pg.ImageItem()
-            self._adjuct_color_map()
             self.plot_widget.addItem(self.img)
+        self._adjuct_color_map(log_scale)
         self.img.setImage(phase_pattern.DNA)
 
         fi_min, fi_max, theta_min, theta_max = phase_pattern.limits_to_degrees()
@@ -40,10 +43,18 @@ class PhasePattern2dWidget(QtWidgets.QWidget):
         self.plot_widget.setLimits(xMin = fi_min, xMax = fi_max, yMin = theta_min, yMax = theta_max)
         self.plot_widget.setRange(xRange = (fi_min, fi_max), yRange = (theta_min, theta_max))
 
-    def _adjuct_color_map(self):
-        colormap = cm.get_cmap("jet")
-        colormap._init()
-        lut = (colormap._lut * 255).view(np.ndarray)
+    def _adjuct_color_map(self, log_scale):
+        if not log_scale:
+            colormap = cm.get_cmap("jet")
+            colormap._init()
+            lut = (colormap._lut * 255).view(np.ndarray)
+        else:
+            pos = np.exp(np.linspace(-5, 0, 10))
+            color = np.empty((10, 4), dtype=np.ubyte)
+            color[:, :3] = np.linspace(0, 255, 10).reshape(10, 1)
+            color[:, 3] = 255
+            colormap = pg.ColorMap(pos, color)
+            lut = colormap.getLookupTable(alpha=False)
         self.img.setLookupTable(lut)
 
     def mouseClicked(self, evt):

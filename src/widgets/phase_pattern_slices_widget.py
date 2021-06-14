@@ -18,9 +18,7 @@ class PhasePatternSlicesWidget(QtWidgets.QWidget):
             self.vbox.addWidget(plot_widget)
         self.setLayout(self.vbox)
 
-
-
-    def plot_slices(self, fi_deg, theta_deg, slice_fi_deg, slice_theta_deg, phase_pattern):
+    def plot_slices(self, fi_deg, theta_deg, slice_fi_deg, slice_theta_deg, phase_pattern, log_scale):
         fi_min, fi_max, theta_min, theta_max = phase_pattern.limits_to_degrees()
 
         if self.line_fi is None:
@@ -30,6 +28,7 @@ class PhasePatternSlicesWidget(QtWidgets.QWidget):
         self.plot_widget_fi.setTitle(f"θ = {theta_deg:.2f}°")
         self.plot_widget_fi.setLimits(xMin=fi_min, xMax=fi_max, yMin=slice_fi_deg.min(), yMax=slice_fi_deg.max())
         self.plot_widget_fi.getPlotItem().enableAutoRange()
+        self.plot_widget_fi.setLogMode(False, log_scale)
 
         if self.line_theta is None:
             self.line_theta = self.plot_widget_theta.plot(np.degrees(phase_pattern.theta_array), slice_theta_deg)
@@ -38,4 +37,5 @@ class PhasePatternSlicesWidget(QtWidgets.QWidget):
         self.plot_widget_theta.setTitle(f"φ = {fi_deg:.2f}°")
         self.plot_widget_theta.setLimits(xMin=theta_min, xMax=theta_max, yMin=slice_theta_deg.min(), yMax=slice_theta_deg.max())
         self.plot_widget_theta.getPlotItem().enableAutoRange()
+        self.plot_widget_theta.setLogMode(False, log_scale)
 

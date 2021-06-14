@@ -1,4 +1,3 @@
-import pyqtgraph as pg
 from PyQt5 import QtCore, QtWidgets
 
 from widgets.settings_widget import SettingsWidget
@@ -36,20 +35,23 @@ class MainWindow(QtWidgets.QMainWindow):
         self.grid.setColumnStretch(1, 1)
 
         self.phase_pattern = PhasePattern(self.settings_widget.to_dict())
+        self.log_scale = False
 
     def refresh(self):
         options = self.settings_widget.to_dict()
         self.phase_pattern.refresh(options)
+        self.log_scale = options['log_scale']
         self.plot_2d()
         self.plot_3d()
 
     def plot_2d(self):
-        self.phase_pattern_2d_widget.plot(self.phase_pattern)
+        self.phase_pattern_2d_widget.plot(self.phase_pattern, self.log_scale)
 
     def plot_3d(self):
-        self.phase_pattern_3d_widget.plot(self.phase_pattern)
+        self.phase_pattern_3d_widget.plot(self.phase_pattern, self.log_scale)
 
     def plot_slices(self, fi_deg, theta_deg):
         slice_fi_deg, slice_theta_deg = self.phase_pattern.get_slices(fi_deg, theta_deg)
-        self.phase_pattern_slices_widget.plot_slices(fi_deg, theta_deg, slice_fi_deg, slice_theta_deg, self.phase_pattern)
+        self.phase_pattern_slices_widget.plot_slices(fi_deg, theta_deg, slice_fi_deg, slice_theta_deg,
+                                                     self.phase_pattern, self.log_scale)
 
