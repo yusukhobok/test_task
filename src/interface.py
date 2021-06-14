@@ -41,12 +41,13 @@ class MainWindow(QtWidgets.QMainWindow):
         options = self.settings_widget.to_dict()
         self.phase_pattern.refresh(options)
         self.plot_2d()
+        self.plot_3d()
 
     def plot_2d(self):
         self.phase_pattern_2d_widget.plot(self.phase_pattern)
 
     def plot_3d(self):
-        print(self.phase_pattern.cartesian)
+        self.phase_pattern_3d_widget.plot(self.phase_pattern)
 
     def plot_slices(self, fi_deg, theta_deg):
         slice_fi_deg, slice_theta_deg = self.phase_pattern.get_slices(fi_deg, theta_deg)

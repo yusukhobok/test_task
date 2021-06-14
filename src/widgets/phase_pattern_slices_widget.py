@@ -7,21 +7,18 @@ class PhasePatternSlicesWidget(QtWidgets.QWidget):
         QtWidgets.QWidget.__init__(self, parent)
         self.vbox = QtWidgets.QVBoxLayout()
         self.plot_widget_fi = pg.PlotWidget()
-        self.plot_widget_fi.setLabel('bottom', 'φ', "°")
-        self.plot_widget_fi.setLabel('left', 'G', "")
-        self.plot_widget_fi.getPlotItem().getAxis('bottom').enableAutoSIPrefix(False)
-        self.plot_widget_fi.getPlotItem().getAxis('left').enableAutoSIPrefix(False)
         self.plot_widget_theta = pg.PlotWidget()
-        self.plot_widget_theta.setLabel('bottom', 'θ', "°")
-        self.plot_widget_theta.setLabel('left', 'G', "")
-        self.plot_widget_theta.getPlotItem().getAxis('bottom').enableAutoSIPrefix(False)
-        self.plot_widget_theta.getPlotItem().getAxis('left').enableAutoSIPrefix(False)
-        self.vbox.addWidget(self.plot_widget_fi)
-        self.vbox.addWidget(self.plot_widget_theta)
-        self.setLayout(self.vbox)
-
         self.line_fi = None
         self.line_theta = None
+        for plot_widget in (self.plot_widget_fi, self.plot_widget_theta):
+            plot_widget.setLabel('bottom', 'θ', "°")
+            plot_widget.setLabel('left', 'G', "")
+            plot_widget.getPlotItem().getAxis('bottom').enableAutoSIPrefix(False)
+            plot_widget.getPlotItem().getAxis('left').enableAutoSIPrefix(False)
+            self.vbox.addWidget(plot_widget)
+        self.setLayout(self.vbox)
+
+
 
     def plot_slices(self, fi_deg, theta_deg, slice_fi_deg, slice_theta_deg, phase_pattern):
         fi_min, fi_max, theta_min, theta_max = phase_pattern.limits_to_degrees()
