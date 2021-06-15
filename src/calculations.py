@@ -143,7 +143,6 @@ class PhasePattern:
         self.fi_grid = self.fi_grid.T
         self.theta_grid = self.theta_grid.T
         self.DNA = self._calc_G(self.fi_grid, self.theta_grid)
-        np.savetxt('data.csv', self.DNA, delimiter=';', fmt='%.2f')
 
     def calc_cartesian(self):
         fi_gaps = len(self.fi_array) // 100
