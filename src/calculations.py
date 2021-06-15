@@ -86,6 +86,7 @@ class PhasePattern:
         self._update_options(fi_s, theta_s, fi_0, theta_0, fi_count, theta_count)
         if is_new_options:
             self.calc()
+        return is_new_options
 
     def calc(self):
         self._fill_angle_arrays()
@@ -167,11 +168,11 @@ class PhasePattern:
 
     def get_slices(self, fi_deg, theta_deg):
         fi, theta = np.radians(fi_deg), np.radians(theta_deg)
-        delta_fi = self.fi_array[1] - self.fi_array[0]
-        delta_theta = self.theta_array[1] - self.theta_array[0]
+        delta_fi = self.results['fi_array'][1] - self.results['fi_array'][0]
+        delta_theta = self.results['theta_array'][1] - self.results['theta_array'][0]
         index_fi = int((fi - self.fi_min) // delta_fi)
         index_theta = int((theta - self.theta_min) // delta_theta)
-        return self.DNA[:,index_theta], self.DNA[index_fi, :]
+        return self.results['DNA'][:,index_theta], self.results['DNA'][index_fi, :]
 
 
 

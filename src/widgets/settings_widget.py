@@ -26,7 +26,7 @@ class SettingsWidget(QtWidgets.QWidget):
                                              default_options['theta_count_max'])
         self.log_scale = self.add_bool_item("Логарифмический масштаб", False)
         self.btn_calc = QtWidgets.QPushButton("Расчет")
-        self.btn_calc.clicked.connect(self._parent.refresh)
+        self.btn_calc.clicked.connect(self._parent.recalculate)
         self.vbox.addWidget(self.btn_calc)
         self.setLayout(self.vbox)
 

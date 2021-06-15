@@ -37,15 +37,30 @@ class MainWindow(QtWidgets.QMainWindow):
         self.grid.setColumnStretch(0, 1)
         self.grid.setColumnStretch(1, 1)
 
-        self.refresh()
+        self.recalculate(first_run=True)
 
-    def refresh(self):
+    def recalculate(self, first_run=False):
+        self.settings_widget.setEnabled(False)
         options = self.settings_widget.to_dict()
-        self.phase_pattern.refresh(options)
-        self.log_scale = options['log_scale']
-        self.plot_2d()
-        self.plot_3d()
-        self.plot_slices()
+
+        def refresh(result):
+            if first_run or result:
+                widgets = (self.phase_pattern_2d_widget, self.phase_pattern_3d_widget, self.phase_pattern_slices_widget)
+                for widget in widgets:
+                    widget.setEnabled(False)
+                self.log_scale = options['log_scale']
+                self.plot_2d()
+                self.plot_3d()
+                self.plot_slices()
+                for widget in widgets:
+                    widget.setEnabled(True)
+            self.settings_widget.setEnabled(True)
+
+        from thread import Operation
+        operation = Operation(self)
+        operation.set_func(self.phase_pattern.refresh, options)
+        operation.set_finish_function(refresh)
+        operation.start()
 
     def plot_2d(self):
         self.phase_pattern_2d_widget.plot(self.phase_pattern.results, self.log_scale)
