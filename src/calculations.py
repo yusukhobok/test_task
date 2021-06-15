@@ -5,17 +5,17 @@ import numpy as np
 class PhasePattern:
     DEFAULT_OPTIONS = {
             "fi_s_deg": 40,
-            "theta_s_deg": -20,
+            "theta_s_deg": 20,
             "fi_0_deg": 10,
             "theta_0_deg": 15,
-            "fi_count": 50,
-            "theta_count": 20,
+            "fi_count": 1000,
+            "theta_count": 1000,
             "l_main": 1000,
             "l_side": 100,
             "fi_min_deg": -90,
             "fi_max_deg": 90,
-            "theta_min_deg": -50,
-            "theta_max_deg": 50,
+            "theta_min_deg": -90,
+            "theta_max_deg": 90,
             "fi_s_min_deg": -60,
             "fi_s_max_deg": 60,
             "theta_s_min_deg": -60,
@@ -24,9 +24,9 @@ class PhasePattern:
             "fi_0_max_deg": 15,
             "theta_0_min_deg": 0,
             "theta_0_max_deg": 15,
-            "fi_count_min": 20,
+            "fi_count_min": 100,
             "fi_count_max": 10000,
-            "theta_count_min": 20,
+            "theta_count_min": 100,
             "theta_count_max": 10000,
         }
 
@@ -57,6 +57,24 @@ class PhasePattern:
         self.results = None
         self.calc()
 
+    # def log(self):
+    #     print(f"fi_s: {self.fi_s:.2f}рад; {np.degrees(self.fi_s):.2f} градусов")
+    #     print(f"theta_s: {self.theta_s:.2f}рад; {np.degrees(self.theta_s):.2f} градусов")
+    #     print(f"fi_0: {self.fi_0:.2f}рад; {np.degrees(self.fi_0):.2f} градусов")
+    #     print(f"theta_0: {self.theta_0:.2f}рад; {np.degrees(self.theta_0):.2f} градусов")
+    #     print(f"fi_count: {self.fi_count}")
+    #     print(f"theta_count: {self.theta_count}")
+    #     print("========")
+    #     print(f"fi_array: len={len(self.fi_array)}")
+    #     print(f"fi_array: start = {self.fi_array[0]:.2f}рад; {np.degrees(self.fi_array[0]):.2f} градусов")
+    #     print(f"fi_array: end = {self.fi_array[-1]:.2f}рад; {np.degrees(self.fi_array[-1]):.2f} градусов")
+    #     print(f"theta_array: len={len(self.theta_array)}")
+    #     print(f"theta_array: start = {self.theta_array[0]:.2f}рад; {np.degrees(self.theta_array[0]):.2f} градусов")
+    #     print(f"theta_array: end = {self.theta_array[-1]:.2f}рад; {np.degrees(self.theta_array[-1]):.2f} градусов")
+    #     print("========")
+    #     for _ in range(3):
+    #         print()
+
     def refresh(self, options):
         fi_s = np.radians(options["fi_s_deg"])
         theta_s = np.radians(options["theta_s_deg"])
@@ -73,6 +91,9 @@ class PhasePattern:
         self._fill_angle_arrays()
         self.calc_DNA()
         self.calc_cartesian()
+        self._save_results()
+
+    def _save_results(self):
         self.results = {'fi_s': self.fi_s,
                         'theta_s': self.theta_s,
                         'limits_deg': self.limits_to_degrees(),
@@ -118,7 +139,9 @@ class PhasePattern:
         self.theta_array = np.linspace(self.theta_min, self.theta_max, self.theta_count)
 
     def calc_DNA(self):
-        self.fi_grid, self.theta_grid = np.meshgrid(self.theta_array, self.fi_array)
+        self.fi_grid, self.theta_grid = np.meshgrid(self.fi_array, self.theta_array)
+        self.fi_grid = self.fi_grid.T
+        self.theta_grid = self.theta_grid.T
         self.DNA = self._calc_G(self.fi_grid, self.theta_grid)
         np.savetxt('data.csv', self.DNA, delimiter=';', fmt='%.2f')
 
