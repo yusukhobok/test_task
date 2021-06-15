@@ -3,21 +3,48 @@ import numpy as np
 
 
 class PhasePattern:
-    def __init__(self, options):
-        self.fi_s = np.radians(30)
-        self.theta_s = np.radians(20)
-        self.fi_0 = np.radians(10)
-        self.theta_0 = np.radians(10)
-        self.fi_count = 10000
-        self.theta_count = 10000
+    DEFAULT_OPTIONS = {
+            "fi_s_deg": 40,
+            "theta_s_deg": -20,
+            "fi_0_deg": 10,
+            "theta_0_deg": 15,
+            "fi_count": 50,
+            "theta_count": 20,
+            "l_main": 1000,
+            "l_side": 100,
+            "fi_min_deg": -90,
+            "fi_max_deg": 90,
+            "theta_min_deg": -50,
+            "theta_max_deg": 50,
+            "fi_s_min_deg": -60,
+            "fi_s_max_deg": 60,
+            "theta_s_min_deg": -60,
+            "theta_s_max_deg": 60,
+            "fi_0_min_deg": 0,
+            "fi_0_max_deg": 15,
+            "theta_0_min_deg": 0,
+            "theta_0_max_deg": 15,
+            "fi_count_min": 20,
+            "fi_count_max": 10000,
+            "theta_count_min": 20,
+            "theta_count_max": 10000,
+        }
 
-        self.l_main = 10
-        self.l_side = 1
+    def __init__(self):
+        self.fi_s = np.radians(PhasePattern.DEFAULT_OPTIONS['fi_s_deg'])
+        self.theta_s = np.radians(PhasePattern.DEFAULT_OPTIONS['theta_s_deg'])
+        self.fi_0 = np.radians(PhasePattern.DEFAULT_OPTIONS['fi_0_deg'])
+        self.theta_0 = np.radians(PhasePattern.DEFAULT_OPTIONS['theta_0_deg'])
+        self.fi_count = PhasePattern.DEFAULT_OPTIONS['fi_count']
+        self.theta_count = PhasePattern.DEFAULT_OPTIONS['theta_count']
 
-        self.fi_min = np.radians(-60)
-        self.fi_max = np.radians(60)
-        self.theta_min = np.radians(-50)
-        self.theta_max = np.radians(50)
+        self.l_main = PhasePattern.DEFAULT_OPTIONS['l_main']
+        self.l_side = PhasePattern.DEFAULT_OPTIONS['l_side']
+
+        self.fi_min = np.radians(PhasePattern.DEFAULT_OPTIONS['fi_min_deg'])
+        self.fi_max = np.radians(PhasePattern.DEFAULT_OPTIONS['fi_max_deg'])
+        self.theta_min = np.radians(PhasePattern.DEFAULT_OPTIONS['theta_min_deg'])
+        self.theta_max = np.radians(PhasePattern.DEFAULT_OPTIONS['theta_max_deg'])
 
         self.fi_array = None
         self.theta_array = None
@@ -27,18 +54,50 @@ class PhasePattern:
         self.DNA = None
         self.cartesian = None
 
-        self.refresh(options)
+        self.results = None
+        self.calc()
 
     def refresh(self, options):
-        self.fi_s = np.radians(options.get("fi_s_deg", 30))
-        self.theta_s = np.radians(options.get("theta_s_deg", 20))
-        self.fi_0 = np.radians(options.get("fi_0_deg", 10))
-        self.theta_0 = np.radians(options.get("theta_0_deg", 10))
-        self.fi_count = options.get("fi_count", 10000)
-        self.theta_count = options.get("theta_count", 10000)
+        fi_s = np.radians(options["fi_s_deg"])
+        theta_s = np.radians(options["theta_s_deg"])
+        fi_0 = np.radians(options["fi_0_deg"])
+        theta_0 = np.radians(options["theta_0_deg"])
+        fi_count = options["fi_count"]
+        theta_count = options["theta_count"]
+        is_new_options = self._is_new_options(fi_s, theta_s, fi_0, theta_0, fi_count, theta_count)
+        self._update_options(fi_s, theta_s, fi_0, theta_0, fi_count, theta_count)
+        if is_new_options:
+            self.calc()
+
+    def calc(self):
         self._fill_angle_arrays()
         self.calc_DNA()
         self.calc_cartesian()
+        self.results = {'fi_s': self.fi_s,
+                        'theta_s': self.theta_s,
+                        'limits_deg': self.limits_to_degrees(),
+                        'fi_0': self.fi_0,
+                        'theta_0': self.theta_0,
+                        'fi_array': self.fi_array,
+                        'theta_array': self.theta_array,
+                        'DNA': self.DNA[:,:],
+                        'cartesian': {'x': self.cartesian['x'],
+                                      'y': self.cartesian['y'],
+                                      'z': self.cartesian['z'],
+                                      'tri': self.cartesian['tri']}
+                        }
+
+    def _is_new_options(self, fi_s, theta_s, fi_0, theta_0, fi_count, theta_count):
+        return (fi_s != self.fi_s) or (theta_s != self.theta_s) or (fi_0 != self.fi_0) or (theta_0 != self.theta_0) or \
+               (fi_count != self.fi_count) or (theta_count != self.theta_count)
+
+    def _update_options(self, fi_s, theta_s, fi_0, theta_0, fi_count, theta_count):
+        self.fi_s = fi_s
+        self.theta_s = theta_s
+        self.fi_0 = fi_0
+        self.theta_0 = theta_0
+        self.fi_count = fi_count
+        self.theta_count = theta_count
 
     def _calc_l(self, fi, theta):
         L = np.empty((self.fi_count, self.theta_count))
@@ -59,8 +118,9 @@ class PhasePattern:
         self.theta_array = np.linspace(self.theta_min, self.theta_max, self.theta_count)
 
     def calc_DNA(self):
-        self.fi_grid, self.theta_grid = np.meshgrid(self.fi_array, self.theta_array)
+        self.fi_grid, self.theta_grid = np.meshgrid(self.theta_array, self.fi_array)
         self.DNA = self._calc_G(self.fi_grid, self.theta_grid)
+        np.savetxt('data.csv', self.DNA, delimiter=';', fmt='%.2f')
 
     def calc_cartesian(self):
         fi_gaps = len(self.fi_array) // 100
@@ -89,7 +149,7 @@ class PhasePattern:
         delta_theta = self.theta_array[1] - self.theta_array[0]
         index_fi = int((fi - self.fi_min) // delta_fi)
         index_theta = int((theta - self.theta_min) // delta_theta)
-        return np.degrees(self.DNA[:,index_theta]), np.degrees(self.DNA[index_fi, :])
+        return self.DNA[:,index_theta], self.DNA[index_fi, :]
 
 
 

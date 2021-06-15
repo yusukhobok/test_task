@@ -7,8 +7,7 @@ from mayavi.core.ui.api import MayaviScene, MlabSceneModel, SceneEditor
 
 class Visualization(HasTraits):
     scene = Instance(MlabSceneModel, ())
-    view = View(Item('scene', editor=SceneEditor(scene_class=MayaviScene),
-                     height=250, width=300, show_label=False), resizable=True)
+    view = View(Item('scene', editor=SceneEditor(scene_class=MayaviScene), show_label=False), resizable=True)
 
 
 class PhasePattern3dWidget(QtGui.QWidget):
@@ -20,11 +19,11 @@ class PhasePattern3dWidget(QtGui.QWidget):
         self.vbox.addWidget(self.ui)
         self.setLayout(self.vbox)
 
-    def plot(self, phase_pattern, log_scale):
-        x = phase_pattern.cartesian['x']
-        y = phase_pattern.cartesian['y']
-        z = phase_pattern.cartesian['z']
-        triangles = phase_pattern.cartesian['tri'].triangles
+    def plot(self, results, log_scale):
+        x = results['cartesian']['x']
+        y = results['cartesian']['y']
+        z = results['cartesian']['z']
+        triangles = results['cartesian']['tri'].triangles
         mlab.clf()
         mlab.triangular_mesh(x, y, z, triangles)
         mlab.axes()

@@ -6,11 +6,14 @@ from widgets.phase_pattern_3d_widget import PhasePattern3dWidget
 from widgets.phase_pattern_slices_widget import PhasePatternSlicesWidget
 
 from calculations import PhasePattern
-
+import numpy as np
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
+        self.phase_pattern = PhasePattern()
+        self.log_scale = False
+
         self.setWindowTitle("Диаграмма направленности фазированной антенной решетки")
         self.setWindowFlags(QtCore.Qt.Window)
 
@@ -34,8 +37,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.grid.setColumnStretch(0, 1)
         self.grid.setColumnStretch(1, 1)
 
-        self.phase_pattern = PhasePattern(self.settings_widget.to_dict())
-        self.log_scale = False
+        self.refresh()
 
     def refresh(self):
         options = self.settings_widget.to_dict()
@@ -43,15 +45,18 @@ class MainWindow(QtWidgets.QMainWindow):
         self.log_scale = options['log_scale']
         self.plot_2d()
         self.plot_3d()
+        self.plot_slices()
 
     def plot_2d(self):
-        self.phase_pattern_2d_widget.plot(self.phase_pattern, self.log_scale)
+        self.phase_pattern_2d_widget.plot(self.phase_pattern.results, self.log_scale)
 
     def plot_3d(self):
-        self.phase_pattern_3d_widget.plot(self.phase_pattern, self.log_scale)
+        self.phase_pattern_3d_widget.plot(self.phase_pattern.results, self.log_scale)
 
-    def plot_slices(self, fi_deg, theta_deg):
+    def plot_slices(self):
+        fi_deg = self.phase_pattern_2d_widget.current_position['fi']
+        theta_deg = self.phase_pattern_2d_widget.current_position['theta']
         slice_fi_deg, slice_theta_deg = self.phase_pattern.get_slices(fi_deg, theta_deg)
         self.phase_pattern_slices_widget.plot_slices(fi_deg, theta_deg, slice_fi_deg, slice_theta_deg,
-                                                     self.phase_pattern, self.log_scale)
+                                                     self.phase_pattern.results, self.log_scale)
 

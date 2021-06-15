@@ -5,12 +5,25 @@ class SettingsWidget(QtWidgets.QWidget):
         QtWidgets.QWidget.__init__(self, parent)
         self._parent = parent
         self.vbox = QtWidgets.QVBoxLayout()
-        self.fi_s_deg = self.add_float_item("Угол установки луча по азимуту (φ<sub>s</sub>), °", 30, -60, 60, 3, 1)
-        self.theta_s_deg = self.add_float_item("Угол установки луча по возвышению (θ<sub>s</sub>), °", 20, -60, 60, 3, 1)
-        self.fi_0_deg = self.add_float_item("Ширина главного лепестка по азимуту (φ<sub>0</sub>), °", 10, 0, 15, 3, 1)
-        self.theta_0_deg = self.add_float_item("Ширина главного лепестка по возвышению (θ<sub>0</sub>), °", 10, 0, 15, 3, 1)
-        self.fi_count = self.add_int_item("Размеры расчетной сетки по азимуту, шагов", 1000, 100, 10000)
-        self.theta_count = self.add_int_item("Размеры расчетной сетки по возвышению, шагов", 1000, 100, 10000)
+        default_options = self._parent.phase_pattern.DEFAULT_OPTIONS
+        self.fi_s_deg = self.add_float_item("Угол установки луча по азимуту (φ<sub>s</sub>), °", 
+                                            default_options['fi_s_deg'], default_options['fi_s_min_deg'],
+                                            default_options['fi_s_max_deg'], 3, 1)
+        self.theta_s_deg = self.add_float_item("Угол установки луча по возвышению (θ<sub>s</sub>), °", 
+                                               default_options['theta_s_deg'], default_options['theta_s_min_deg'],
+                                               default_options['theta_s_max_deg'], 3, 1)
+        self.fi_0_deg = self.add_float_item("Ширина главного лепестка по азимуту (φ<sub>0</sub>), °", 
+                                            default_options['fi_0_deg'], default_options['fi_0_min_deg'],
+                                            default_options['fi_0_max_deg'], 3, 1)
+        self.theta_0_deg = self.add_float_item("Ширина главного лепестка по возвышению (θ<sub>0</sub>), °", 
+                                               default_options['theta_0_deg'], default_options['theta_0_min_deg'],
+                                               default_options['theta_0_max_deg'], 3, 1)
+        self.fi_count = self.add_int_item("Размеры расчетной сетки по азимуту, шагов", 
+                                          default_options['fi_count'], default_options['fi_count_min'],
+                                          default_options['fi_count_max'])
+        self.theta_count = self.add_int_item("Размеры расчетной сетки по возвышению, шагов", 
+                                             default_options['theta_count'], default_options['theta_count_min'],
+                                             default_options['theta_count_max'])
         self.log_scale = self.add_bool_item("Логарифмический масштаб", False)
         self.btn_calc = QtWidgets.QPushButton("Расчет")
         self.btn_calc.clicked.connect(self._parent.refresh)

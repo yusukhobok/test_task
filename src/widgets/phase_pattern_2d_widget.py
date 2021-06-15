@@ -16,22 +16,24 @@ class PhasePattern2dWidget(QtWidgets.QWidget):
         self.plot_widget.setLabel('left', 'θ', "°")
         self.plot_widget.getPlotItem().getAxis('bottom').enableAutoSIPrefix(False)
         self.plot_widget.getPlotItem().getAxis('left').enableAutoSIPrefix(False)
-        self.plot_widget.scene().sigMouseClicked.connect(self.mouseClicked)
+        self.plot_widget.scene().sigMouseClicked.connect(self._mouse_clicked)
         self.vbox.addWidget(self.plot_widget)
         self.setLayout(self.vbox)
 
         self.img = None
         self.current_scale = [1, 1]
         self.currentMove = [0, 0]
+        self.cross = None
+        self.current_position = None
 
-    def plot(self, phase_pattern, log_scale):
+    def plot(self, results, log_scale):
         if self.img is None:
             self.img = pg.ImageItem()
             self.plot_widget.addItem(self.img)
         self._adjuct_color_map(log_scale)
-        self.img.setImage(phase_pattern.DNA)
+        self.img.setImage(results['DNA'])
 
-        fi_min, fi_max, theta_min, theta_max = phase_pattern.limits_to_degrees()
+        fi_min, fi_max, theta_min, theta_max = results['limits_deg']
         scale_x = (fi_max - fi_min) / self.img.width()
         scale_y = (theta_max - theta_min) / self.img.height()
         if self.current_scale[0] != 0 and self.current_scale[1] != 0:
@@ -40,8 +42,10 @@ class PhasePattern2dWidget(QtWidgets.QWidget):
             self.img.moveBy(fi_min - self.currentMove[0], theta_min - self.currentMove[1])
             self.currentMove = [fi_min, theta_min]
 
-        self.plot_widget.setLimits(xMin = fi_min, xMax = fi_max, yMin = theta_min, yMax = theta_max)
-        self.plot_widget.setRange(xRange = (fi_min, fi_max), yRange = (theta_min, theta_max))
+        self.plot_widget.setLimits(xMin=fi_min, xMax=fi_max, yMin=theta_min, yMax=theta_max)
+        self.plot_widget.setRange(xRange=(fi_min, fi_max), yRange=(theta_min, theta_max))
+        self.current_position = {'fi': np.degrees(results['fi_s']), 'theta': np.degrees(results['theta_s'])}
+        self._plot_cross()
 
     def _adjuct_color_map(self, log_scale):
         if not log_scale:
@@ -57,10 +61,18 @@ class PhasePattern2dWidget(QtWidgets.QWidget):
             lut = colormap.getLookupTable(alpha=False)
         self.img.setLookupTable(lut)
 
-    def mouseClicked(self, evt):
+    def _mouse_clicked(self, evt):
         pnt = evt.scenePos()
         pnt = (pnt.x(), pnt.y())
         mouse_point = self.plot_widget.getPlotItem().vb.mapSceneToView(evt.scenePos())
-        fi_deg = mouse_point.x()
-        theta_deg = mouse_point.y()
-        self._parent.plot_slices(fi_deg, theta_deg)
+        fi_deg, theta_deg = mouse_point.x(), mouse_point.y()
+        self.current_position = {'fi': fi_deg, 'theta': theta_deg}
+        self._parent.plot_slices()
+        self._plot_cross()
+
+    def _plot_cross(self):
+        if self.cross is None:
+            self.cross = self.plot_widget.plot([self.current_position['fi']], [self.current_position['theta']],
+                                               symbol='+', pen=pg.mkPen(color='r'))
+        else:
+            self.cross.setData([self.current_position['fi']], [self.current_position['theta']])
