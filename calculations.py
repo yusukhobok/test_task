@@ -20,6 +20,7 @@ class PhasePattern:
     theta_max: максимально возможное значение возвышения, рад.
     fi_array: массив всех значений азимута, рад (количество элементов равно fi_count).
     theta_array: массив всех значений возвышения, рад (количество элементов равно theta_count).
+    log_scale: отображение в логарифмическом масштабе
     DNA: рассчитываемая матрица ДНА (размером fi_count на theta_count).
     cartesian: результат преобразования сферических в декартовы координаты.
     results: словарь с результатами прошлых расчетов (необходим для того, чтобы при расчете новых даннных можно было 
@@ -55,6 +56,7 @@ class PhasePattern:
             'l_main_max': 100,
             'l_side_min': 0,
             'l_side_max': 100,
+            'log_scale': False
         }
 
     def __init__(self):
@@ -72,6 +74,7 @@ class PhasePattern:
         self.fi_max = np.radians(PhasePattern.DEFAULT_OPTIONS['fi_max_deg'])
         self.theta_min = np.radians(PhasePattern.DEFAULT_OPTIONS['theta_min_deg'])
         self.theta_max = np.radians(PhasePattern.DEFAULT_OPTIONS['theta_max_deg'])
+        self.log_scale = PhasePattern.DEFAULT_OPTIONS['log_scale']
 
         self.fi_array = None
         self.theta_array = None
@@ -94,8 +97,10 @@ class PhasePattern:
         theta_count = options['theta_count']
         l_main = options['l_main']
         l_side = options['l_side']
-        is_new_options = self._is_new_options(fi_s, theta_s, fi_0, theta_0, fi_count, theta_count, l_main, l_side)
-        self._update_options(fi_s, theta_s, fi_0, theta_0, fi_count, theta_count, l_main, l_side)
+        log_scale = options['log_scale']
+        is_new_options = self._is_new_options(fi_s, theta_s, fi_0, theta_0, fi_count, theta_count, l_main, l_side,
+                                              log_scale)
+        self._update_options(fi_s, theta_s, fi_0, theta_0, fi_count, theta_count, l_main, l_side, log_scale)
         if is_new_options:
             self._calc()
         return is_new_options
@@ -115,6 +120,7 @@ class PhasePattern:
                         'theta_0': self.theta_0,
                         'fi_array': self.fi_array,
                         'theta_array': self.theta_array,
+                        'log_scale': self.log_scale,
                         'DNA': self.DNA[:, :],
                         'cartesian': {'x': self.cartesian['x'],
                                       'y': self.cartesian['y'],
@@ -122,13 +128,13 @@ class PhasePattern:
                                       'tri': self.cartesian['tri']}
                         }
 
-    def _is_new_options(self, fi_s, theta_s, fi_0, theta_0, fi_count, theta_count, l_main, l_side):
+    def _is_new_options(self, fi_s, theta_s, fi_0, theta_0, fi_count, theta_count, l_main, l_side, log_scale):
         """Проверка, изменились ли исходные данные по сравнению с прошлым расчетом"""
         return (fi_s != self.fi_s) or (theta_s != self.theta_s) or (fi_0 != self.fi_0) or (theta_0 != self.theta_0) or \
                (fi_count != self.fi_count) or (theta_count != self.theta_count) or \
-               (l_main != self.l_main) or (l_side != self.l_side)
+               (l_main != self.l_main) or (l_side != self.l_side) or (log_scale != self.log_scale)
 
-    def _update_options(self, fi_s, theta_s, fi_0, theta_0, fi_count, theta_count, l_main, l_side):
+    def _update_options(self, fi_s, theta_s, fi_0, theta_0, fi_count, theta_count, l_main, l_side, log_scale):
         self.fi_s = fi_s
         self.theta_s = theta_s
         self.fi_0 = fi_0
@@ -137,6 +143,7 @@ class PhasePattern:
         self.theta_count = theta_count
         self.l_main = l_main
         self.l_side = l_side
+        self.log_scale = log_scale
 
     def _calc_l(self, fi, theta):
         L = np.empty((self.fi_count, self.theta_count))
@@ -174,6 +181,9 @@ class PhasePattern:
         fi = self._fi_grid[::fi_gaps, ::theta_gaps].flatten()
         theta = self._theta_grid[::fi_gaps, ::theta_gaps].flatten()
         r = self.DNA[::fi_gaps, ::theta_gaps].flatten()
+        if self.log_scale:
+            eps = np.finfo(r.dtype).eps
+            r = np.log10(r + eps)
 
         x = r * np.sin(theta) * np.cos(fi)
         y = r * np.sin(theta) * np.sin(fi)
@@ -192,4 +202,6 @@ class PhasePattern:
         delta_theta = self.results['theta_array'][1] - self.results['theta_array'][0]
         index_fi = int((fi - self.fi_min) // delta_fi)
         index_theta = int((theta - self.theta_min) // delta_theta)
-        return self.results['DNA'][:, index_theta], self.results['DNA'][index_fi, :]
+        slice_fi = self.results['DNA'][index_fi, :]
+        slice_theta = self.results['DNA'][:, index_theta]
+        return slice_theta, slice_fi

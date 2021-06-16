@@ -25,7 +25,6 @@ pgcolorbar==1.1.1
 Pillow==8.2.0
 pluggy==0.13.1
 py==1.10.0
-PyAutoGUI==0.9.52
 pyface==7.3.0
 PyGetWindow==0.0.9
 Pygments==2.9.0
@@ -45,7 +44,6 @@ pytest==6.2.4
 pytest-qt==4.0.2
 python-dateutil==2.8.1
 PyTweening==1.0.3
-pyvista==0.31.0
 scipy==1.6.3
 scooby==0.5.7
 six==1.16.0

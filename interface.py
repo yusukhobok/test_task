@@ -12,7 +12,6 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
         self.phase_pattern = PhasePattern()
-        self.log_scale = False
         self.title = "Диаграмма направленности фазированной антенной решетки"
 
         self.setWindowTitle(self.title)
@@ -50,8 +49,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.operation.start()
 
     def after_calculation(self, result, first_run, options):
-        if first_run or result or self.log_scale != options['log_scale']:
-            self.log_scale = options['log_scale']
+        if first_run or result:
             widgets = (self.phase_pattern_2d_widget, self.phase_pattern_3d_widget, self.phase_pattern_slices_widget)
             for widget in widgets:
                 widget.setEnabled(False)
@@ -73,11 +71,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def plot_2d(self):
         """Отображение двумерной цветовой карты"""
-        self.phase_pattern_2d_widget.plot(self.phase_pattern.results, self.log_scale)
+        self.phase_pattern_2d_widget.plot(self.phase_pattern.results)
 
     def plot_3d(self):
         """3D отображение ДНА"""
-        self.phase_pattern_3d_widget.plot(self.phase_pattern.results, self.log_scale)
+        self.phase_pattern_3d_widget.plot(self.phase_pattern.results)
 
     def plot_slices(self):
         """Отображение двух срезов (по азимуту и по возвышению)"""
@@ -85,7 +83,7 @@ class MainWindow(QtWidgets.QMainWindow):
         theta_deg = self.phase_pattern_2d_widget.current_position['theta']
         slice_fi_deg, slice_theta_deg = self.phase_pattern.get_slices(fi_deg, theta_deg)
         self.phase_pattern_slices_widget.plot_slices(fi_deg, theta_deg, slice_fi_deg, slice_theta_deg,
-                                                     self.phase_pattern.results, self.log_scale)
+                                                     self.phase_pattern.results)
 
 
 

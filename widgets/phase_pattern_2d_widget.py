@@ -26,12 +26,12 @@ class PhasePattern2dWidget(QtWidgets.QWidget):
         self.cross = None  # перекрестие
         self.current_position = None  # текущее положение перекрестия (соответствует срезам ДНА)
 
-    def plot(self, results, log_scale):
+    def plot(self, results):
         """Отображение двумерной цветовой карты"""
         if self.img is None:
             self.img = pg.ImageItem()
             self.plot_widget.addItem(self.img)
-        self._adjuct_color_map(log_scale)
+        self._adjuct_color_map(results['log_scale'])
         self.img.setImage(results['DNA'])
 
         fi_min, fi_max, theta_min, theta_max = results['limits_deg']
@@ -54,7 +54,7 @@ class PhasePattern2dWidget(QtWidgets.QWidget):
         lut = (colormap._lut * 255).view(np.ndarray)[:-1, :]
         if log_scale:
             size = lut.shape[0]
-            pos = np.exp(np.linspace(-5, 0, size))
+            pos = 10 ** np.linspace(-5, 0, size)
             colormap = pg.ColorMap(pos, lut)
             lut = colormap.getLookupTable(alpha=False)
         self.img.setLookupTable(lut)

@@ -33,7 +33,7 @@ class SettingsWidget(QtWidgets.QWidget):
         self.theta_count = self._add_int_item("Размеры расчетной сетки по возвышению, шагов",
                                               default_options['theta_count'], default_options['theta_count_min'],
                                               default_options['theta_count_max'])
-        self.log_scale = self._add_bool_item("Логарифмический масштаб", False)
+        self.log_scale = self._add_bool_item("Логарифмический масштаб", default_options['log_scale'])
         self.btn_calc = QtWidgets.QPushButton("Расчет")
         self.btn_calc.clicked.connect(self._parent.recalculate)
         self.vbox.addWidget(self.btn_calc)
@@ -89,6 +89,6 @@ class SettingsWidget(QtWidgets.QWidget):
             'theta_count': int(self.theta_count.value()),
             'log_scale': self.log_scale.isChecked(),
             'l_main': self.l_main.value(),
-            'l_side': self.l_side.value()
+            'l_side': self.l_side.value(),
         }
 

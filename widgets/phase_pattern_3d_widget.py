@@ -21,7 +21,7 @@ class PhasePattern3dWidget(QtGui.QWidget):
         self.vbox.addWidget(self.ui)
         self.setLayout(self.vbox)
 
-    def plot(self, results, log_scale):
+    def plot(self, results):
         x = results['cartesian']['x']
         y = results['cartesian']['y']
         z = results['cartesian']['z']
