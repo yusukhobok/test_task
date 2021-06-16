@@ -1,33 +1,37 @@
-import matplotlib.tri as mtri
+import matplotlib.tri
 import numpy as np
 
 
 class PhasePattern:
     DEFAULT_OPTIONS = {
-            "fi_s_deg": 40,
-            "theta_s_deg": 20,
-            "fi_0_deg": 10,
-            "theta_0_deg": 15,
-            "fi_count": 1000,
-            "theta_count": 1000,
-            "l_main": 1000,
-            "l_side": 100,
-            "fi_min_deg": -90,
-            "fi_max_deg": 90,
-            "theta_min_deg": -90,
-            "theta_max_deg": 90,
-            "fi_s_min_deg": -60,
-            "fi_s_max_deg": 60,
-            "theta_s_min_deg": -60,
-            "theta_s_max_deg": 60,
-            "fi_0_min_deg": 0,
-            "fi_0_max_deg": 15,
-            "theta_0_min_deg": 0,
-            "theta_0_max_deg": 15,
-            "fi_count_min": 100,
-            "fi_count_max": 10000,
-            "theta_count_min": 100,
-            "theta_count_max": 10000,
+            'fi_s_deg': 40,
+            'theta_s_deg': 20,
+            'fi_0_deg': 10,
+            'theta_0_deg': 15,
+            'fi_count': 1000,
+            'theta_count': 1000,
+            'l_main': 50,
+            'l_side': 10,
+            'fi_min_deg': -90,
+            'fi_max_deg': 90,
+            'theta_min_deg': -90,
+            'theta_max_deg': 90,
+            'fi_s_min_deg': -60,
+            'fi_s_max_deg': 60,
+            'theta_s_min_deg': -60,
+            'theta_s_max_deg': 60,
+            'fi_0_min_deg': 1,
+            'fi_0_max_deg': 15,
+            'theta_0_min_deg': 1,
+            'theta_0_max_deg': 15,
+            'fi_count_min': 100,
+            'fi_count_max': 10000,
+            'theta_count_min': 100,
+            'theta_count_max': 10000,
+            'l_main_min': 0,
+            'l_main_max': 100,
+            'l_side_min': 0,
+            'l_side_max': 100,
         }
 
     def __init__(self):
@@ -57,33 +61,17 @@ class PhasePattern:
         self.results = None
         self.calc()
 
-    # def log(self):
-    #     print(f"fi_s: {self.fi_s:.2f}рад; {np.degrees(self.fi_s):.2f} градусов")
-    #     print(f"theta_s: {self.theta_s:.2f}рад; {np.degrees(self.theta_s):.2f} градусов")
-    #     print(f"fi_0: {self.fi_0:.2f}рад; {np.degrees(self.fi_0):.2f} градусов")
-    #     print(f"theta_0: {self.theta_0:.2f}рад; {np.degrees(self.theta_0):.2f} градусов")
-    #     print(f"fi_count: {self.fi_count}")
-    #     print(f"theta_count: {self.theta_count}")
-    #     print("========")
-    #     print(f"fi_array: len={len(self.fi_array)}")
-    #     print(f"fi_array: start = {self.fi_array[0]:.2f}рад; {np.degrees(self.fi_array[0]):.2f} градусов")
-    #     print(f"fi_array: end = {self.fi_array[-1]:.2f}рад; {np.degrees(self.fi_array[-1]):.2f} градусов")
-    #     print(f"theta_array: len={len(self.theta_array)}")
-    #     print(f"theta_array: start = {self.theta_array[0]:.2f}рад; {np.degrees(self.theta_array[0]):.2f} градусов")
-    #     print(f"theta_array: end = {self.theta_array[-1]:.2f}рад; {np.degrees(self.theta_array[-1]):.2f} градусов")
-    #     print("========")
-    #     for _ in range(3):
-    #         print()
-
     def refresh(self, options):
-        fi_s = np.radians(options["fi_s_deg"])
-        theta_s = np.radians(options["theta_s_deg"])
-        fi_0 = np.radians(options["fi_0_deg"])
-        theta_0 = np.radians(options["theta_0_deg"])
-        fi_count = options["fi_count"]
-        theta_count = options["theta_count"]
-        is_new_options = self._is_new_options(fi_s, theta_s, fi_0, theta_0, fi_count, theta_count)
-        self._update_options(fi_s, theta_s, fi_0, theta_0, fi_count, theta_count)
+        fi_s = np.radians(options['fi_s_deg'])
+        theta_s = np.radians(options['theta_s_deg'])
+        fi_0 = np.radians(options['fi_0_deg'])
+        theta_0 = np.radians(options['theta_0_deg'])
+        fi_count = options['fi_count']
+        theta_count = options['theta_count']
+        l_main = options['l_main']
+        l_side = options['l_side']
+        is_new_options = self._is_new_options(fi_s, theta_s, fi_0, theta_0, fi_count, theta_count, l_main, l_side)
+        self._update_options(fi_s, theta_s, fi_0, theta_0, fi_count, theta_count, l_main, l_side)
         if is_new_options:
             self.calc()
         return is_new_options
@@ -102,24 +90,27 @@ class PhasePattern:
                         'theta_0': self.theta_0,
                         'fi_array': self.fi_array,
                         'theta_array': self.theta_array,
-                        'DNA': self.DNA[:,:],
+                        'DNA': self.DNA[:, :],
                         'cartesian': {'x': self.cartesian['x'],
                                       'y': self.cartesian['y'],
                                       'z': self.cartesian['z'],
                                       'tri': self.cartesian['tri']}
                         }
 
-    def _is_new_options(self, fi_s, theta_s, fi_0, theta_0, fi_count, theta_count):
+    def _is_new_options(self, fi_s, theta_s, fi_0, theta_0, fi_count, theta_count, l_main, l_side):
         return (fi_s != self.fi_s) or (theta_s != self.theta_s) or (fi_0 != self.fi_0) or (theta_0 != self.theta_0) or \
-               (fi_count != self.fi_count) or (theta_count != self.theta_count)
+               (fi_count != self.fi_count) or (theta_count != self.theta_count) or \
+               (l_main != self.l_main) or (l_side != self.l_side)
 
-    def _update_options(self, fi_s, theta_s, fi_0, theta_0, fi_count, theta_count):
+    def _update_options(self, fi_s, theta_s, fi_0, theta_0, fi_count, theta_count, l_main, l_side):
         self.fi_s = fi_s
         self.theta_s = theta_s
         self.fi_0 = fi_0
         self.theta_0 = theta_0
         self.fi_count = fi_count
         self.theta_count = theta_count
+        self.l_main = l_main
+        self.l_side = l_side
 
     def _calc_l(self, fi, theta):
         L = np.empty((self.fi_count, self.theta_count))
@@ -152,7 +143,6 @@ class PhasePattern:
         theta_gaps = len(self.theta_array) // 100
         if theta_gaps == 0:
             theta_gaps = 1
-
         fi = self.fi_grid[::fi_gaps, ::theta_gaps].flatten()
         theta = self.theta_grid[::fi_gaps, ::theta_gaps].flatten()
         r = self.DNA[::fi_gaps, ::theta_gaps].flatten()
@@ -160,7 +150,7 @@ class PhasePattern:
         x = r * np.sin(theta) * np.cos(fi)
         y = r * np.sin(theta) * np.sin(fi)
         z = r * np.cos(theta)
-        tri = mtri.Triangulation(fi, theta)
+        tri = matplotlib.tri.Triangulation(fi, theta)
         self.cartesian = {'x': x, 'y': y, 'z': z, 'tri': tri}
 
     def limits_to_degrees(self):
@@ -172,8 +162,4 @@ class PhasePattern:
         delta_theta = self.results['theta_array'][1] - self.results['theta_array'][0]
         index_fi = int((fi - self.fi_min) // delta_fi)
         index_theta = int((theta - self.theta_min) // delta_theta)
-        return self.results['DNA'][:,index_theta], self.results['DNA'][index_fi, :]
-
-
-
-
+        return self.results['DNA'][:, index_theta], self.results['DNA'][index_fi, :]

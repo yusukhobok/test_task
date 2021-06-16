@@ -1,5 +1,7 @@
 test_task_env/
 .idea/
+src/.idea/
+src/.pytest_cache/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -1,8 +1,8 @@
 from mayavi import mlab
-from pyface.qt import QtGui, QtCore
-from traits.api import HasTraits, Instance, on_trait_change
-from traitsui.api import View, Item
 from mayavi.core.ui.api import MayaviScene, MlabSceneModel, SceneEditor
+from pyface.qt import QtGui
+from traits.api import HasTraits, Instance
+from traitsui.api import View, Item
 
 
 class Visualization(HasTraits):
@@ -26,4 +26,4 @@ class PhasePattern3dWidget(QtGui.QWidget):
         triangles = results['cartesian']['tri'].triangles
         mlab.clf()
         mlab.triangular_mesh(x, y, z, triangles)
-        mlab.axes()
+        mlab.orientation_axes()

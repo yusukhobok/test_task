@@ -1,4 +1,4 @@
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore
 from PyQt5.QtCore import QObject, pyqtSignal
 
 
@@ -16,7 +16,7 @@ class BackgroundThread(QtCore.QThread):
 
 
 class Operation(QObject):
-    finishSignal = pyqtSignal('PyQt_PyObject')
+    finish_signal = pyqtSignal('PyQt_PyObject')
 
     def __init__(self, parent, func_cancel=None):
         QObject.__init__(self, parent)
@@ -46,12 +46,11 @@ class Operation(QObject):
         self.backgroundThread.start()
 
     def finish(self):
-        self.finishSignal.emit(self.backgroundThread.result)
+        self.finish_signal.emit(self.backgroundThread.result)
 
-    def set_finish_function(self, func):
-        def wrapper(*args, **kwargs):
+    def set_finish_function(self, func, *args, **kwargs):
+        def wrapper():
             if not self.isStop:
                 if func is not None:
                     func(*args, **kwargs)
-        self.finishSignal.connect(wrapper)
-
+        self.finish_signal.connect(wrapper)

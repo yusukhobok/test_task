@@ -1,9 +1,7 @@
-import sys
-
-import pyqtgraph as pg
-from PyQt5 import QtWidgets
-from matplotlib import cm
 import numpy as np
+import pyqtgraph as pg
+from matplotlib import cm
+from PyQt5 import QtWidgets
 
 
 class PhasePattern2dWidget(QtWidgets.QWidget):
@@ -12,8 +10,8 @@ class PhasePattern2dWidget(QtWidgets.QWidget):
         self._parent = parent
         self.vbox = QtWidgets.QVBoxLayout()
         self.plot_widget = pg.PlotWidget()
-        self.plot_widget.setLabel('bottom', 'φ', "°")
-        self.plot_widget.setLabel('left', 'θ', "°")
+        self.plot_widget.setLabel('bottom', 'φ', '°')
+        self.plot_widget.setLabel('left', 'θ', '°')
         self.plot_widget.getPlotItem().getAxis('bottom').enableAutoSIPrefix(False)
         self.plot_widget.getPlotItem().getAxis('left').enableAutoSIPrefix(False)
         self.plot_widget.scene().sigMouseClicked.connect(self._mouse_clicked)
@@ -62,8 +60,6 @@ class PhasePattern2dWidget(QtWidgets.QWidget):
         self.img.setLookupTable(lut)
 
     def _mouse_clicked(self, evt):
-        pnt = evt.scenePos()
-        pnt = (pnt.x(), pnt.y())
         mouse_point = self.plot_widget.getPlotItem().vb.mapSceneToView(evt.scenePos())
         fi_deg, theta_deg = mouse_point.x(), mouse_point.y()
         self.current_position = {'fi': fi_deg, 'theta': theta_deg}
