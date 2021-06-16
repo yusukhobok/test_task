@@ -49,16 +49,13 @@ class PhasePattern2dWidget(QtWidgets.QWidget):
         self._plot_cross()
 
     def _adjuct_color_map(self, log_scale):
-        if not log_scale:
-            colormap = cm.get_cmap("jet")
-            colormap._init()
-            lut = (colormap._lut * 255).view(np.ndarray)
-        else:
-            pos = np.exp(np.linspace(-5, 0, 10))
-            color = np.empty((10, 4), dtype=np.ubyte)
-            color[:, :3] = np.linspace(0, 255, 10).reshape(10, 1)
-            color[:, 3] = 255
-            colormap = pg.ColorMap(pos, color)
+        colormap = cm.get_cmap("jet")
+        colormap._init()
+        lut = (colormap._lut * 255).view(np.ndarray)[:-1, :]
+        if log_scale:
+            size = lut.shape[0]
+            pos = np.exp(np.linspace(-5, 0, size))
+            colormap = pg.ColorMap(pos, lut)
             lut = colormap.getLookupTable(alpha=False)
         self.img.setLookupTable(lut)
 
