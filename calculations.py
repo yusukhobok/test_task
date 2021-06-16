@@ -186,7 +186,7 @@ class PhasePattern:
         return np.degrees(self.fi_min), np.degrees(self.fi_max), np.degrees(self.theta_min), np.degrees(self.theta_max)
 
     def get_slices(self, fi_deg, theta_deg):
-        """возвращает срез ДНА по азимуту и возвышению (задаются в градусах)"""
+        """возвращает срез ДНА по азимуту и срез ДНА по возвышению (задаются в градусах)"""
         fi, theta = np.radians(fi_deg), np.radians(theta_deg)
         delta_fi = self.results['fi_array'][1] - self.results['fi_array'][0]
         delta_theta = self.results['theta_array'][1] - self.results['theta_array'][0]
