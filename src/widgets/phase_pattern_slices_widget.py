@@ -4,6 +4,8 @@ import numpy as np
 
 
 class PhasePatternSlicesWidget(QtWidgets.QWidget):
+    """Виджет с отображением двух срезов (по азимуту и по возвышению)"""
+
     def __init__(self, parent=None):
         QtWidgets.QWidget.__init__(self, parent)
         self.vbox = QtWidgets.QVBoxLayout()

@@ -5,6 +5,8 @@ from PyQt5 import QtWidgets
 
 
 class PhasePattern2dWidget(QtWidgets.QWidget):
+    """Виджет с отображением ДНА в виде двумерной цветовой карты"""
+
     def __init__(self, parent=None):
         QtWidgets.QWidget.__init__(self, parent)
         self._parent = parent
@@ -18,13 +20,14 @@ class PhasePattern2dWidget(QtWidgets.QWidget):
         self.vbox.addWidget(self.plot_widget)
         self.setLayout(self.vbox)
 
-        self.img = None
+        self.img = None  # изображение
         self.current_scale = [1, 1]
-        self.currentMove = [0, 0]
-        self.cross = None
-        self.current_position = None
+        self.current_move = [0, 0]
+        self.cross = None  # перекрестие
+        self.current_position = None  # текущее положение перекрестия (соответствует срезам ДНА)
 
     def plot(self, results, log_scale):
+        """Отображение двумерной цветовой карты"""
         if self.img is None:
             self.img = pg.ImageItem()
             self.plot_widget.addItem(self.img)
@@ -37,8 +40,8 @@ class PhasePattern2dWidget(QtWidgets.QWidget):
         if self.current_scale[0] != 0 and self.current_scale[1] != 0:
             self.img.scale(scale_x/self.current_scale[0], scale_y/self.current_scale[1])
             self.current_scale = [scale_x, scale_y]
-            self.img.moveBy(fi_min - self.currentMove[0], theta_min - self.currentMove[1])
-            self.currentMove = [fi_min, theta_min]
+            self.img.moveBy(fi_min - self.current_move[0], theta_min - self.current_move[1])
+            self.current_move = [fi_min, theta_min]
 
         self.plot_widget.setLimits(xMin=fi_min, xMax=fi_max, yMin=theta_min, yMax=theta_max)
         self.plot_widget.setRange(xRange=(fi_min, fi_max), yRange=(theta_min, theta_max))

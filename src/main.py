@@ -2,7 +2,7 @@ import os
 import sys
 
 import pyqtgraph as pg
-from PyQt5 import QtCore, QtWidgets, QtGui
+from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import QApplication
 
 from interface import MainWindow

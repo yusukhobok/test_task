@@ -41,6 +41,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.recalculate(first_run=True)
 
     def recalculate(self, first_run=False):
+        """Расчет ДНА (запускается в отдельном потоке)"""
         self.setWindowTitle(f"{self.title} (РАСЧЕТ...)")
         self.settings_widget.setEnabled(False)
         options = self.settings_widget.to_dict()
@@ -58,6 +59,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.after_refresh_plots()
 
     def refresh_plots(self):
+        """Перерисовка диаграмм после расчета ДНА"""
         self.plot_2d()
         self.plot_3d()
         self.plot_slices()
@@ -70,12 +72,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowTitle(self.title)
 
     def plot_2d(self):
+        """Отображение двумерной цветовой карты"""
         self.phase_pattern_2d_widget.plot(self.phase_pattern.results, self.log_scale)
 
     def plot_3d(self):
+        """3D отображение ДНА"""
         self.phase_pattern_3d_widget.plot(self.phase_pattern.results, self.log_scale)
 
     def plot_slices(self):
+        """Отображение двух срезов (по азимуту и по возвышению)"""
         fi_deg = self.phase_pattern_2d_widget.current_position['fi']
         theta_deg = self.phase_pattern_2d_widget.current_position['theta']
         slice_fi_deg, slice_theta_deg = self.phase_pattern.get_slices(fi_deg, theta_deg)

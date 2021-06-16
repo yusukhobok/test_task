@@ -11,6 +11,8 @@ class Visualization(HasTraits):
 
 
 class PhasePattern3dWidget(QtGui.QWidget):
+    """Виджет с 3D отображением ДНА"""
+
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
         self.vbox = QtGui.QVBoxLayout()

@@ -3,6 +3,29 @@ import numpy as np
 
 
 class PhasePattern:
+    """Класс, в котором выполняются расчеты диаграммы направленности фазированной антенной решетки (ДНА).
+
+    Атрибуты:
+    fi_s: угол установки луча по азимуту, рад.
+    theta_s: угол установки луча по возвышению, рад.
+    fi_0: ширина главного лепестка по азимуту, рад.
+    theta_0: ширина главного лепестка по возвышению, рад.
+    fi_count: размеры расчетной сетки по азимуту.
+    theta_count: размеры расчетной сетки по возвышению.
+    l_main: уровень главного лепестка ДНА.
+    l_side: уровень бокового лепестка ДНА.
+    fi_min: минимально возможное значения азимута, рад.
+    fi_max: максимально возможное значение азимута, рад.
+    theta_min: минимально возможное значение возвышения, рад.
+    theta_max: максимально возможное значение возвышения, рад.
+    fi_array: массив всех значений азимута, рад (количество элементов равно fi_count).
+    theta_array: массив всех значений возвышения, рад (количество элементов равно theta_count).
+    DNA: рассчитываемая матрица ДНА (размером fi_count на theta_count).
+    cartesian: результат преобразования сферических в декартовы координаты.
+    results: словарь с результатами прошлых расчетов (необходим для того, чтобы при расчете новых даннных можно было 
+             работать со старыми.
+    DEFAULT_OPTIONS - значения атрибутов по умолчанию
+    """
     DEFAULT_OPTIONS = {
             'fi_s_deg': 40,
             'theta_s_deg': 20,
@@ -20,9 +43,9 @@ class PhasePattern:
             'fi_s_max_deg': 60,
             'theta_s_min_deg': -60,
             'theta_s_max_deg': 60,
-            'fi_0_min_deg': 1,
+            'fi_0_min_deg': 0.001,
             'fi_0_max_deg': 15,
-            'theta_0_min_deg': 1,
+            'theta_0_min_deg': 0.001,
             'theta_0_max_deg': 15,
             'fi_count_min': 100,
             'fi_count_max': 10000,
@@ -52,16 +75,17 @@ class PhasePattern:
 
         self.fi_array = None
         self.theta_array = None
-        self.fi_grid = None
-        self.theta_grid = None
+        self._fi_grid = None
+        self._theta_grid = None
 
         self.DNA = None
         self.cartesian = None
 
         self.results = None
-        self.calc()
+        self._calc()
 
     def refresh(self, options):
+        """Перерасчет параметров ДНА"""
         fi_s = np.radians(options['fi_s_deg'])
         theta_s = np.radians(options['theta_s_deg'])
         fi_0 = np.radians(options['fi_0_deg'])
@@ -73,19 +97,20 @@ class PhasePattern:
         is_new_options = self._is_new_options(fi_s, theta_s, fi_0, theta_0, fi_count, theta_count, l_main, l_side)
         self._update_options(fi_s, theta_s, fi_0, theta_0, fi_count, theta_count, l_main, l_side)
         if is_new_options:
-            self.calc()
+            self._calc()
         return is_new_options
 
-    def calc(self):
+    def _calc(self):
         self._fill_angle_arrays()
-        self.calc_DNA()
-        self.calc_cartesian()
+        self._calc_DNA()
+        self._calc_cartesian()
         self._save_results()
 
     def _save_results(self):
+        """Сохранение результатов расчета"""
         self.results = {'fi_s': self.fi_s,
                         'theta_s': self.theta_s,
-                        'limits_deg': self.limits_to_degrees(),
+                        'limits_deg': self._limits_to_degrees(),
                         'fi_0': self.fi_0,
                         'theta_0': self.theta_0,
                         'fi_array': self.fi_array,
@@ -98,6 +123,7 @@ class PhasePattern:
                         }
 
     def _is_new_options(self, fi_s, theta_s, fi_0, theta_0, fi_count, theta_count, l_main, l_side):
+        """Проверка, изменились ли исходные данные по сравнению с прошлым расчетом"""
         return (fi_s != self.fi_s) or (theta_s != self.theta_s) or (fi_0 != self.fi_0) or (theta_0 != self.theta_0) or \
                (fi_count != self.fi_count) or (theta_count != self.theta_count) or \
                (l_main != self.l_main) or (l_side != self.l_side)
@@ -130,21 +156,23 @@ class PhasePattern:
         self.fi_array = np.linspace(self.fi_min, self.fi_max, self.fi_count)
         self.theta_array = np.linspace(self.theta_min, self.theta_max, self.theta_count)
 
-    def calc_DNA(self):
-        self.fi_grid, self.theta_grid = np.meshgrid(self.fi_array, self.theta_array)
-        self.fi_grid = self.fi_grid.T
-        self.theta_grid = self.theta_grid.T
-        self.DNA = self._calc_G(self.fi_grid, self.theta_grid)
+    def _calc_DNA(self):
+        """расчет ДНА"""
+        self._fi_grid, self._theta_grid = np.meshgrid(self.fi_array, self.theta_array)
+        self._fi_grid = self._fi_grid.T
+        self._theta_grid = self._theta_grid.T
+        self.DNA = self._calc_G(self._fi_grid, self._theta_grid)
 
-    def calc_cartesian(self):
+    def _calc_cartesian(self):
+        """пересчет ДНА из сферических в декартовы координаты"""
         fi_gaps = len(self.fi_array) // 100
         if fi_gaps == 0:
             fi_gaps = 1
         theta_gaps = len(self.theta_array) // 100
         if theta_gaps == 0:
             theta_gaps = 1
-        fi = self.fi_grid[::fi_gaps, ::theta_gaps].flatten()
-        theta = self.theta_grid[::fi_gaps, ::theta_gaps].flatten()
+        fi = self._fi_grid[::fi_gaps, ::theta_gaps].flatten()
+        theta = self._theta_grid[::fi_gaps, ::theta_gaps].flatten()
         r = self.DNA[::fi_gaps, ::theta_gaps].flatten()
 
         x = r * np.sin(theta) * np.cos(fi)
@@ -153,10 +181,12 @@ class PhasePattern:
         tri = matplotlib.tri.Triangulation(fi, theta)
         self.cartesian = {'x': x, 'y': y, 'z': z, 'tri': tri}
 
-    def limits_to_degrees(self):
+    def _limits_to_degrees(self):
+        """возвращает размеры модели в градусах"""
         return np.degrees(self.fi_min), np.degrees(self.fi_max), np.degrees(self.theta_min), np.degrees(self.theta_max)
 
     def get_slices(self, fi_deg, theta_deg):
+        """возвращает срез ДНА по азимуту и возвышению (задаются в градусах)"""
         fi, theta = np.radians(fi_deg), np.radians(theta_deg)
         delta_fi = self.results['fi_array'][1] - self.results['fi_array'][0]
         delta_theta = self.results['theta_array'][1] - self.results['theta_array'][0]

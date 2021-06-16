@@ -11,7 +11,7 @@ def widget(qtbot):
     widget_.show()
     qtbot.addWidget(widget_)
     qtbot.mouseClick(widget_.settings_widget.btn_calc, QtCore.Qt.LeftButton)
-    qtbot.waitUntil(lambda: widget_.settings_widget.isEnabled())
+    qtbot.waitUntil(widget_.settings_widget.isEnabled)
     return widget_
 
 
@@ -30,4 +30,3 @@ def test_2d_image_shape(widget):
 
 def test_2d_image(widget):
     assert np.array_equal(widget.phase_pattern_2d_widget.img.image, widget.phase_pattern.DNA)
-
